@@ -4,6 +4,6 @@ Description=Kyiv Metro loading screen. Authour: d.naumenko.a@gmail.com
 ModuleName=script
 
 [script]
-ImageDir=/usr/share/plymouth/themes/metro-screen
-ScriptFile=/usr/share/plymouth/themes/metro-screen/metro-screen.script
+ImageDir=/lib/plymouth/themes/metro-boot-screen
+ScriptFile=/lib/plymouth/themes/metro-boot-screen/metro-screen.script
 
