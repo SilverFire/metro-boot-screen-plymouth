@@ -1,0 +1,186 @@
+Window.SetBackgroundTopColor(0.164705882, 0.156862745, 0.235294118);
+Window.SetBackgroundBottomColor(0.164705882, 0.156862745, 0.235294118);
+
+#----------- Metro logo ----------------
+metrologo.image = ImageNew("logo.png");
+metrologo.sprite = SpriteNew();
+metrologo.sprite.SetImage(metrologo.image);
+
+SpriteSetX(metrologo.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(metrologo.image) / 2);
+SpriteSetY(metrologo.sprite, SpriteWindowGetHeight() / 3 + ImageGetHeight(metrologo.image) / 5);
+
+
+#---------- Loading text ---------------
+loadingText.image = ImageNew("text_loading.png");
+loadingText.sprite = SpriteNew();
+loadingText.sprite.SetImage(loadingText.image);
+SpriteSetX(loadingText.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(loadingText.image) / 2);
+SpriteSetY(loadingText.sprite, SpriteWindowGetHeight() / 4);
+
+#---------- Animated circle variables ---------
+spinner.imagecount = 32;
+spinner.target_width =  0.15*0.15 * Window.GetWidth();
+spinner.target_height = 0.15*0.15 * Window.GetWidth();
+spinner.angle = 0;
+spinner.index = 0;
+
+fun LoadingSpinner (index) {
+	index = Math.Int(index);
+	if (!RotatedImageCache[index])
+		RotatedImageCache[index] = spinner.original_image.Rotate((Math.Pi*2*index)/spinner.imagecount).Scale(spinner.target_width, spinner.target_height);
+
+	return RotatedImageCache[index];
+}
+
+spinner.image = ImageNew("spinner.png");
+spinner.original_image = spinner.image.Scale(spinner.target_width, spinner.target_width);
+spinner.sprite = SpriteNew();
+spinner.sprite.SetImage(LoadingSpinner(0));
+SpriteSetX(spinner.sprite, SpriteWindowGetWidth()/2 + ImageGetWidth(loadingText.image)/1.9);
+SpriteSetY(spinner.sprite, SpriteWindowGetHeight() / 4 + ImageGetHeight(loadingText.image) / 4);
+
+#----------- Refresh function ----------
+
+fun refresh_callback () {
+	if (status == "normal") {
+		spinner.index += -1;
+		spinner.index %= spinner.imagecount;
+		spinner.sprite.SetImage(LoadingSpinner(spinner.index));
+        spinner.sprite.SetOpacity(1);
+		motif.sprite.SetOpacity(motif.opacity);
+
+        metrologo.sprite.SetOpacity(1);
+	} else {
+		motif.sprite.SetOpacity(0);
+        spinner.sprite.SetOpacity(0);
+	}
+}
+
+
+if (Plymouth.GetMode() != "suspend" && Plymouth.GetMode() != "resume") {
+  Plymouth.SetRefreshFunction (refresh_callback);
+}
+
+#----------------------------------------- Dialog --------------------------------
+
+status = "normal";
+
+fun dialog_setup()
+{
+    local.box;
+    local.lock;
+    local.entry;
+    local.prompt_sprite;
+
+    box.image = ImageNew("box.png");
+    lock.image = ImageNew("lock.png");
+    entry.image = ImageNew("entry.png");
+
+    box.sprite = SpriteNew();
+    box.sprite.SetImage(box.image);
+    box.x = Window.GetX() + Window.GetWidth()  / 2 - box.image.GetWidth()/2;
+    box.y = Window.GetY() + Window.GetHeight() / 2 - box.image.GetHeight()/2;
+    box.z = 10000;
+    box.sprite.SetPosition(box.x, box.y, box.z);
+
+    lock.sprite = SpriteNew();
+    lock.sprite.SetImage(lock.image);
+    lock.x = box.x + box.image.GetWidth()/2 - (lock.image.GetWidth() + entry.image.GetWidth()) / 2;
+    lock.y = box.y + box.image.GetHeight()/2 - lock.image.GetHeight()/2;
+    lock.z = box.z + 1;
+    lock.sprite.SetPosition(lock.x, lock.y, lock.z);
+
+    entry.sprite = SpriteNew();
+    entry.sprite.SetImage(entry.image);
+    entry.x = lock.x + lock.image.GetWidth();
+    entry.y = box.y + box.image.GetHeight()/2 - entry.image.GetHeight()/2;
+    entry.z = box.z + 1;
+    entry.sprite.SetPosition(entry.x, entry.y, entry.z);
+
+    prompt_sprite = SpriteNew();
+    prompt_sprite.SetPosition(box.x, box.y - 20, box.z);
+
+    global.dialog.box = box;
+    global.dialog.lock = lock;
+    global.dialog.entry = entry;
+    global.dialog.bullet_image = ImageNew("bullet.png");
+    global.dialog.prompt_sprite = prompt_sprite;
+    dialog_opacity (1);
+}
+
+fun dialog_opacity(opacity)
+{
+    dialog.box.sprite.SetOpacity(opacity);
+    dialog.lock.sprite.SetOpacity(opacity);
+    dialog.entry.sprite.SetOpacity(opacity);
+    dialog.prompt_sprite.SetOpacity(opacity);
+    for (index = 0; dialog.bullet[index]; index++)
+    {
+        dialog.bullet[index].sprite.SetOpacity(opacity);
+    }
+}
+
+fun display_normal_callback ()
+{
+    global.status = "normal";
+    if (global.dialog)
+      dialog_opacity (0);
+}
+
+fun display_password_callback (prompt, bullets)
+{
+    global.status = "password";
+    if (!global.dialog)
+        dialog_setup();
+    else
+        dialog_opacity(1);
+    motif.sprite.SetOpacity(0);
+    spinner.sprite.SetOpacity(0);
+
+    dialog.prompt_sprite.SetImage(Image.Text(prompt, 1.0, 1.0, 1.0));
+    for (index = 0; dialog.bullet[index] || index < bullets; index++)
+    {
+
+        if (!dialog.bullet[index])
+        {
+            dialog.bullet[index].sprite = SpriteNew();
+            dialog.bullet[index].sprite.SetImage(dialog.bullet_image);
+            dialog.bullet[index].x = dialog.entry.x + index * dialog.bullet_image.GetWidth();
+            dialog.bullet[index].y = dialog.entry.y + dialog.entry.image.GetHeight() / 2 - dialog.bullet_image.GetHeight() / 2;
+            dialog.bullet[index].z = dialog.entry.z + 1;
+            dialog.bullet[index].sprite.SetPosition(dialog.bullet[index].x, dialog.bullet[index].y, dialog.bullet[index].z);
+        }
+        if (index < bullets)
+            dialog.bullet[index].sprite.SetOpacity(1);
+        else
+            dialog.bullet[index].sprite.SetOpacity(0);
+    }
+}
+
+fun display_message_callback (prompt)
+{
+
+    prompt = Image.Text(prompt,1.0, 1.0, 1.0);
+    sprite_prompt.SetImage(prompt);
+    sprite_prompt.SetPosition(Window.GetX() + (Window.GetWidth() - prompt.GetWidth()) / 2, Window.GetY() + Window.GetHeight() * 0.93, 2);
+}
+
+/* instantiate dialog at startup, to ensure all icons are loaded in memory before initrd is unmounted, in case /usr isn't mounted yet */
+dialog_setup(); dialog_opacity(0);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetMessageFunction(display_message_callback);
+
+
+#----------------------------------------- Quit --------------------------------
+
+fun quit_callback ()
+{
+ spinner.sprite.SetOpacity (0);
+  if (Plymouth.GetMode() == "shutdown") {
+   motif.sprite.SetOpacity(0);
+  }
+}
+
+Plymouth.SetQuitFunction(quit_callback);
+

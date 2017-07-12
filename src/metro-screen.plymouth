@@ -1,0 +1,9 @@
+[Plymouth Theme]
+Name=Kyiv Metro loading screen
+Description=Kyiv Metro loading screen. Authour: d.naumenko.a@gmail.com
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/metro-screen
+ScriptFile=/usr/share/plymouth/themes/metro-screen/metro-screen.script
+
