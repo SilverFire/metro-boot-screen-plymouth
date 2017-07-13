@@ -3,18 +3,23 @@ Window.SetBackgroundBottomColor(0.164705882, 0.156862745, 0.235294118);
 
 #----------- Metro logo ----------------
 metrologo.image = ImageNew("logo.png");
+metrologo.target_width  =  0.6 * Window.GetWidth();
+metrologo.target_height =  0.6 * ImageGetHeight(metrologo.image) / ImageGetWidth(metrologo.image) * Window.GetWidth();
+metrologo.scaled = metrologo.image.Scale(metrologo.target_width, metrologo.target_height);
 metrologo.sprite = SpriteNew();
-metrologo.sprite.SetImage(metrologo.image);
+metrologo.sprite.SetImage(metrologo.scaled);
 
-SpriteSetX(metrologo.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(metrologo.image) / 2);
-SpriteSetY(metrologo.sprite, SpriteWindowGetHeight() / 3 + ImageGetHeight(metrologo.image) / 5);
-
+SpriteSetX(metrologo.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(metrologo.scaled) / 2);
+SpriteSetY(metrologo.sprite, SpriteWindowGetHeight() / 3 + ImageGetHeight(metrologo.scaled) / 5);
 
 #---------- Loading text ---------------
 loadingText.image = ImageNew("text_loading.png");
+loadingText.target_width  =  0.5 * Window.GetWidth();
+loadingText.target_height =  0.5 * ImageGetHeight(loadingText.image) / ImageGetWidth(loadingText.image) * Window.GetWidth();
+loadingText.scaled = loadingText.image.Scale(loadingText.target_width, loadingText.target_height);
 loadingText.sprite = SpriteNew();
-loadingText.sprite.SetImage(loadingText.image);
-SpriteSetX(loadingText.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(loadingText.image) / 2);
+loadingText.sprite.SetImage(loadingText.scaled);
+SpriteSetX(loadingText.sprite, SpriteWindowGetWidth() / 2 - ImageGetWidth(loadingText.scaled) / 2);
 SpriteSetY(loadingText.sprite, SpriteWindowGetHeight() / 4);
 
 #---------- Animated circle variables ---------
@@ -36,8 +41,8 @@ spinner.image = ImageNew("spinner.png");
 spinner.original_image = spinner.image.Scale(spinner.target_width, spinner.target_width);
 spinner.sprite = SpriteNew();
 spinner.sprite.SetImage(LoadingSpinner(0));
-SpriteSetX(spinner.sprite, SpriteWindowGetWidth()/2 + ImageGetWidth(loadingText.image)/1.9);
-SpriteSetY(spinner.sprite, SpriteWindowGetHeight() / 4 + ImageGetHeight(loadingText.image) / 4);
+SpriteSetX(spinner.sprite, SpriteWindowGetWidth()/2 + ImageGetWidth(loadingText.scaled)/1.9);
+SpriteSetY(spinner.sprite, SpriteWindowGetHeight() / 4 + ImageGetHeight(loadingText.scaled) / 4);
 
 #----------- Refresh function ----------
 
